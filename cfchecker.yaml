@@ -1,0 +1,55 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  LambdaRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+        Version: '2012-10-17'
+      Path: /
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - sts:AssumeRole
+            Effect: Allow
+            Resource:
+            - '*'
+          Version: '2012-10-17'
+        PolicyName: AssumeRole
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - cloudformation:DescribeStacks
+            Effect: Allow
+            Resource:
+            - '*'
+          Version: '2012-10-17'
+        PolicyName: cloudformation
+    Type: AWS::IAM::Role
+  cfchecker:
+    Properties:
+      CodeUri: s3://kter-serverless-repository/e16c478d0ea21fadc654f5638d93b1ee
+      Environment:
+        Variables:
+          TRIGGER_STATUS: CREATE_FAILED, ROLLBACK_FAILED, DELETE_FAILED, UPDATE_ROLLBACK_FAILED
+      Events:
+        Timer:
+          Properties:
+            Schedule: cron(*/5 * ? * MON-FRI *)
+          Type: Schedule
+      Handler: lambda_function.lambda_handler
+      MemorySize: 128
+      Role:
+        Fn::GetAtt:
+        - LambdaRole
+        - Arn
+      Runtime: python3.6
+      Timeout: 3
+    Type: AWS::Serverless::Function
+Transform: AWS::Serverless-2016-10-31
