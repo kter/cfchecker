@@ -12,14 +12,16 @@ Resources:
         Fn::GetAtt:
         - LambdaRole
         - Arn
-      Timeout: 3
+      Timeout: 10
       Environment:
         Variables:
           TRIGGER_STATUS: 'CREATE_FAILED, ROLLBACK_FAILED, DELETE_FAILED, UPDATE_ROLLBACK_FAILED'
+          slackChannel: 
+          SlackWebHookUrl: slack_webhook_url
       Events:
         Timer:
           Properties:
-            Schedule: cron(*/5 * ? * MON-FRI *)
+            Schedule: cron(*/10 * ? * * *)
           Type: Schedule
   LambdaRole:
     Type: AWS::IAM::Role
@@ -65,5 +67,14 @@ Resources:
                 - "logs:CreateLogGroup"
                 - "logs:CreateLogStream"
                 - "logs:PutLogEvents"
-
+      - PolicyName: SSMAccess
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            -
+              Effect: "Allow"
+              Resource:
+                - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/slack_webhook_url
+              Action:
+                - "ssm:GetParameters"
 
