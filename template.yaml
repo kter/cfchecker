@@ -53,3 +53,17 @@ Resources:
             - '*'
           Version: '2012-10-17'
         PolicyName: cloudformation
+      - PolicyName: LogsAccess
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            -
+              Effect: "Allow"
+              Resource:
+                - "*"
+              Action:
+                - "logs:CreateLogGroup"
+                - "logs:CreateLogStream"
+                - "logs:PutLogEvents"
+
+
